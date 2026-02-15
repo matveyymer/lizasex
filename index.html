@@ -116,7 +116,7 @@ h1 {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.8);
+    color: #fff;
     padding: 12px 20px;
     border-radius: 25px;
     cursor: pointer;
@@ -125,6 +125,7 @@ h1 {
     transition: all 0.3s ease;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
     white-space: nowrap;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .music-button:hover {
@@ -135,15 +136,33 @@ h1 {
 }
 
 .music-button.playing {
-    background: rgba(0, 255, 200, 0.15);
-    border-color: rgba(0, 255, 200, 0.3);
-    color: rgba(0, 255, 200, 0.9);
-    box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
 .music-button.playing:hover {
-    background: rgba(0, 255, 200, 0.25);
-    box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
+}
+
+/* Стили для светлого фона */
+.music-button.light-bg {
+    color: #000;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.music-button.light-bg:hover {
+    color: #000;
+}
+
+.music-button.light-bg.playing {
+    color: #000;
+}
+
+.music-button.light-bg.playing:hover {
+    color: #000;
 }
 </style>
 </head>
@@ -243,6 +262,29 @@ window.addEventListener("mousemove", (e) => {
     mouseX = (e.clientX - canvas.width / 2) / 50;
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
+
+// ===== Проверка яркости фона за кнопкой =====
+function checkBackground() {
+    const rect = musicBtn.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    // Получаем изображение из области за кнопкой
+    const imageData = ctx.getImageData(x, y, 1, 1).data;
+    
+    // Вычисляем яркость
+    const brightness = (imageData[0] + imageData[1] + imageData[2]) / 3;
+    
+    // Если яркость > 128 (светлая область) - делаем текст чёрным
+    if (brightness > 128) {
+        musicBtn.classList.add("light-bg");
+    } else {
+        musicBtn.classList.remove("light-bg");
+    }
+}
+
+// Проверяем фон каждый кадр
+setInterval(checkBackground, 100);
 
 // ===== Управление музыкой =====
 function playMusic() {
