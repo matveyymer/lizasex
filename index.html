@@ -22,8 +22,6 @@ html, body {
     overflow-x: hidden;
 }
 
-/* ===== HERO ===== */
-
 .hero {
     position: relative;
     height: 100dvh;
@@ -40,8 +38,6 @@ canvas {
     top: 0;
     left: 0;
 }
-
-/* ===== ТЕКСТ ===== */
 
 h1 {
     font-size: 120px;
@@ -81,8 +77,6 @@ h1 {
         transform: scale(1);
     }
 }
-
-/* ===== ЛЕНТА ===== */
 
 .feed {
     background: #000;
@@ -139,7 +133,6 @@ let stars = [];
 let mouseX = 0;
 let mouseY = 0;
 
-// создаём звёзды
 for (let i = 0; i < 250; i++) {
     stars.push({
         x: Math.random() * canvas.width,
@@ -185,27 +178,31 @@ function drawStars() {
 
 drawStars();
 
-// движение звёзд за мышью
 window.addEventListener("mousemove", (e) => {
     mouseX = (e.clientX - canvas.width / 2) / 50;
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
-// запуск музыки сразу и с fallback на мобильных
-function tryPlayMusic() {
-    music.volume = 1;
-    music.play().catch(() => {
-        const unlock = () => {
-            music.play();
-            window.removeEventListener("click", unlock);
-            window.removeEventListener("touchstart", unlock);
-        };
-        window.addEventListener("click", unlock);
-        window.addEventListener("touchstart", unlock);
+// ===== Авто-старт музыки с обходом блокировок =====
+function unlockAudio() {
+    const silent = new Audio();
+    silent.src = "data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAA..."; // короткий silent mp3
+    silent.play().finally(() => {
+        music.volume = 1;
+        music.play().catch(() => {
+            // fallback на клик/касание
+            const unlock = () => {
+                music.play();
+                window.removeEventListener("click", unlock);
+                window.removeEventListener("touchstart", unlock);
+            };
+            window.addEventListener("click", unlock);
+            window.addEventListener("touchstart", unlock);
+        });
     });
 }
 
-tryPlayMusic();
+window.addEventListener("load", unlockAudio);
 </script>
 
 </body>
