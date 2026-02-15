@@ -93,29 +93,49 @@ h1 {
     object-fit: cover;
 }
 
-.music-button {
+.controls {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 100;
-    background: linear-gradient(45deg, #ff00cc, #3333ff);
-    border: none;
-    color: white;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.music-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
     padding: 12px 20px;
     border-radius: 25px;
     cursor: pointer;
     font-size: 14px;
     font-weight: bold;
     transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
 }
 
 .music-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 0, 204, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .music-button.playing {
-    background: linear-gradient(45deg, #00ffff, #ffcc00);
+    background: rgba(0, 255, 200, 0.15);
+    border-color: rgba(0, 255, 200, 0.3);
+    color: rgba(0, 255, 200, 0.9);
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+}
+
+.music-button.playing:hover {
+    background: rgba(0, 255, 200, 0.25);
+    box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
 }
 </style>
 </head>
@@ -137,9 +157,11 @@ h1 {
     <img src="IMG_0154.jpeg" alt="image">
 </div>
 
-<button class="music-button" id="musicBtn">🎵 Включить музыку</button>
+<div class="controls">
+    <button class="music-button" id="musicBtn">🎵 Включить музыку</button>
+</div>
 
-<audio id="bgMusic" loop>
+<audio id="bgMusic" loop preload="auto">
     <source src="SEMATARY 9 SCARECROWS.mp3" type="audio/mpeg">
     Ваш браузер не поддерживает аудио элемент
 </audio>
@@ -236,7 +258,6 @@ function playMusic() {
                 })
                 .catch(error => {
                     console.error("✗ Ошибка воспроизведения:", error);
-                    console.log("Убедитесь, что файл SEMATARY - 9 SCARECROWS.mp3 находится в одной папке с HTML");
                 });
         }
     }
@@ -244,15 +265,6 @@ function playMusic() {
 
 // Клик на кнопку
 musicBtn.addEventListener("click", playMusic);
-
-// Автозапуск при клике на страницу (если нужен)
-document.addEventListener("click", () => {
-    if (!isPlaying && music.paused) {
-        console.log("Попытка автозапуска музыки...");
-        // Раскомментируйте следующую строку для автозапуска
-        // playMusic();
-    }
-}, { once: true });
 
 // Проверка наличия аудио элемента
 music.addEventListener("error", (e) => {
