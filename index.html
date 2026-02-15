@@ -87,19 +87,150 @@ h1 {
     padding-bottom: 100px;
 }
 
-.feed img {
+.post {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.post img {
     width: 100%;
     display: block;
-    border-radius: 8px;
     object-fit: cover;
     transition: all 0.3s ease;
     cursor: pointer;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.feed img:hover {
+.post img:hover {
     transform: scale(1.02);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+}
+
+.post-actions {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.action-btn.liked {
+    background: rgba(255, 0, 100, 0.3);
+    border-color: rgba(255, 0, 100, 0.5);
+    color: #ff0064;
+}
+
+.action-btn.liked:hover {
+    background: rgba(255, 0, 100, 0.4);
+}
+
+.like-icon {
+    font-size: 16px;
+}
+
+.comment-section {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.comment-section.active {
+    display: block;
+}
+
+.comment {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.comment-author {
+    color: #00ffff;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.comment-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.comment-input {
+    display: none;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.comment-input.active {
+    display: flex;
+}
+
+.comment-input input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.comment-input input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.comment-input input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.comment-input button {
+    background: rgba(0, 255, 200, 0.3);
+    border: 1px solid rgba(0, 255, 200, 0.5);
+    color: #00ffc8;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.comment-input button:hover {
+    background: rgba(0, 255, 200, 0.4);
 }
 
 .controls {
@@ -147,7 +278,6 @@ h1 {
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
 }
 
-/* Светлый фон - чёрный текст и тёмная кнопка */
 .music-button.light-bg {
     background: rgba(0, 0, 0, 0.5);
     border: 2px solid rgba(0, 0, 0, 0.7);
@@ -176,16 +306,7 @@ h1 {
     <h1>lizasex</h1>
 </div>
 
-<div class="feed" id="feed">
-    <img src="IMG_0146.jpeg" alt="image">
-    <img src="IMG_0148.jpeg" alt="image">
-    <img src="IMG_0149.jpeg" alt="image">
-    <img src="IMG_0150.jpeg" alt="image">
-    <img src="IMG_0151.jpeg" alt="image">
-    <img src="IMG_0152.jpeg" alt="image">
-    <img src="IMG_0153.jpeg" alt="image">
-    <img src="IMG_0154.jpeg" alt="image">
-</div>
+<div class="feed" id="feed"></div>
 
 <div class="controls">
     <button class="music-button" id="musicBtn">🎵 Включить музыку</button>
@@ -205,6 +326,119 @@ const feed = document.getElementById("feed");
 
 let isPlaying = false;
 
+// Данные постов
+const posts = [
+    { id: 1, image: "IMG_0146.jpeg" },
+    { id: 2, image: "IMG_0148.jpeg" },
+    { id: 3, image: "IMG_0149.jpeg" },
+    { id: 4, image: "IMG_0150.jpeg" },
+    { id: 5, image: "IMG_0151.jpeg" },
+    { id: 6, image: "IMG_0152.jpeg" },
+    { id: 7, image: "IMG_0153.jpeg" },
+    { id: 8, image: "IMG_0154.jpeg" }
+];
+
+// Хранилище данных
+let postsData = {};
+posts.forEach(post => {
+    postsData[post.id] = {
+        likes: 0,
+        liked: false,
+        comments: [],
+        showComments: false
+    };
+    // Загружаем из localStorage если есть
+    const saved = localStorage.getItem(`post_${post.id}`);
+    if (saved) {
+        postsData[post.id] = JSON.parse(saved);
+    }
+});
+
+// Создаём посты
+function renderPosts() {
+    feed.innerHTML = '';
+    posts.forEach(post => {
+        const data = postsData[post.id];
+        
+        const postEl = document.createElement('div');
+        postEl.className = 'post';
+        postEl.innerHTML = `
+            <img src="${post.image}" alt="image">
+            <div class="post-actions">
+                <button class="action-btn ${data.liked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                    <span class="like-icon">${data.liked ? '❤️' : '🤍'}</span>
+                    <span>${data.likes}</span>
+                </button>
+                <button class="action-btn" onclick="toggleComments(${post.id})">
+                    💬 <span>${data.comments.length}</span>
+                </button>
+            </div>
+            <div class="comment-section ${data.showComments ? 'active' : ''}" id="comments-${post.id}">
+                <div id="comments-list-${post.id}">
+                    ${data.comments.map(c => `
+                        <div class="comment">
+                            <div class="comment-author">${c.author}</div>
+                            <div class="comment-text">${c.text}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="comment-input ${data.showComments ? 'active' : ''}" id="comment-input-${post.id}">
+                    <input type="text" placeholder="Комментарий..." id="input-${post.id}">
+                    <button onclick="addComment(${post.id})">Отправить</button>
+                </div>
+            </div>
+        `;
+        feed.appendChild(postEl);
+    });
+}
+
+// Лайк
+function toggleLike(postId) {
+    const data = postsData[postId];
+    data.liked = !data.liked;
+    data.likes += data.liked ? 1 : -1;
+    savePost(postId);
+    renderPosts();
+}
+
+// Показать/скрыть комменты
+function toggleComments(postId) {
+    const data = postsData[postId];
+    data.showComments = !data.showComments;
+    savePost(postId);
+    renderPosts();
+}
+
+// Добавить комментарий
+function addComment(postId) {
+    const input = document.getElementById(`input-${postId}`);
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    const data = postsData[postId];
+    data.comments.push({
+        author: `User_${Math.floor(Math.random() * 9999)}`,
+        text: text
+    });
+    
+    input.value = '';
+    savePost(postId);
+    renderPosts();
+    
+    // Скролим к новому комменту
+    setTimeout(() => {
+        const commentsList = document.getElementById(`comments-list-${postId}`);
+        commentsList.scrollTop = commentsList.scrollHeight;
+    }, 0);
+}
+
+// Сохранение в localStorage
+function savePost(postId) {
+    localStorage.setItem(`post_${postId}`, JSON.stringify(postsData[postId]));
+}
+
+// Звёзды
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -267,7 +501,7 @@ window.addEventListener("mousemove", (e) => {
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
-// ===== Управление музыкой =====
+// Музыка
 function playMusic() {
     if (isPlaying) {
         music.pause();
@@ -286,17 +520,19 @@ function playMusic() {
                     musicBtn.classList.add("playing");
                 })
                 .catch(error => {
-                    console.error("✗ Ошибка воспроизведения:", error);
+                    console.error("✗ Ошибка:", error);
                 });
         }
     }
 }
 
 musicBtn.addEventListener("click", playMusic);
-
 music.addEventListener("error", (e) => {
     console.error("Ошибка загрузки аудиофайла:", e);
 });
+
+// Инициализация
+renderPosts();
 </script>
 
 </body>
