@@ -115,7 +115,7 @@ h1 {
 .music-button {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     color: #fff;
     padding: 12px 20px;
     border-radius: 25px;
@@ -131,12 +131,12 @@ h1 {
     background: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .music-button.playing {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
     color: #fff;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
 }
@@ -146,17 +146,30 @@ h1 {
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
 }
 
-/* Тёмный текст когда кнопка над светлым фото */
+/* Светлый фон - чёрный текст и тёмная кнопка */
 .music-button.light-bg {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(0, 0, 0, 0.5);
     color: #000;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .music-button.light-bg:hover {
-    color: #000;
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
 }
 
 .music-button.light-bg.playing {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 0, 0, 0.5);
     color: #000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+}
+
+.music-button.light-bg.playing:hover {
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
 }
 </style>
 </head>
@@ -277,20 +290,24 @@ function checkBackground() {
         tempCanvas.width = img.width;
         tempCanvas.height = img.height;
         
-        // Рисуем изображение
-        tempCtx.drawImage(img, 0, 0);
-        
-        // Получаем пиксели в центре изображения (где кнопка)
-        const imageRect = img.getBoundingClientRect();
-        const relX = Math.floor((x - imageRect.left) * (img.width / imageRect.width));
-        const relY = Math.floor((y - imageRect.top) * (img.height / imageRect.height));
-        
-        const imageData = tempCtx.getImageData(relX, relY, 1, 1).data;
-        const brightness = (imageData[0] + imageData[1] + imageData[2]) / 3;
-        
-        if (brightness > 128) {
-            musicBtn.classList.add("light-bg");
-        } else {
+        try {
+            // Рисуем изображение
+            tempCtx.drawImage(img, 0, 0);
+            
+            // Получаем пиксели в центре изображения (где кнопка)
+            const imageRect = img.getBoundingClientRect();
+            const relX = Math.floor((x - imageRect.left) * (img.width / imageRect.width));
+            const relY = Math.floor((y - imageRect.top) * (img.height / imageRect.height));
+            
+            const imageData = tempCtx.getImageData(relX, relY, 1, 1).data;
+            const brightness = (imageData[0] + imageData[1] + imageData[2]) / 3;
+            
+            if (brightness > 140) {
+                musicBtn.classList.add("light-bg");
+            } else {
+                musicBtn.classList.remove("light-bg");
+            }
+        } catch (e) {
             musicBtn.classList.remove("light-bg");
         }
     } else {
@@ -299,9 +316,11 @@ function checkBackground() {
     }
 }
 
-// Проверяем фон при скролле
+// Проверяем фон п��и скролле
 window.addEventListener('scroll', checkBackground);
-window.addEventListener('load', checkBackground);
+window.addEventListener('load', () => {
+    setTimeout(checkBackground, 100);
+});
 setInterval(checkBackground, 200);
 
 // ===== Управление музыкой =====
