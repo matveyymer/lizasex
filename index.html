@@ -42,10 +42,9 @@ canvas {
 h1 {
     font-size: 120px;
     font-weight: bold;
-    z-index: 2;
-    opacity: 0;
-    transform: scale(0.8);
-
+    z-index: 999;
+    opacity: 1;
+    
     background: linear-gradient(
         45deg,
         #ff00cc,
@@ -58,64 +57,38 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    animation:
-        gradientMove 6s ease infinite,
-        fadeInText 3s ease forwards;
+    animation: gradientMove 6s ease infinite;
 
     text-shadow: 0 0 25px rgba(255,255,255,0.4);
-    transition: all 0.3s ease;
+    transition: all 0.1s ease;
     margin: 0;
-    position: relative;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    white-space: nowrap;
+}
+
+h1.scrolled {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-size: 28px;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 998;
 }
 
 @keyframes gradientMove {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
-}
-
-@keyframes fadeInText {
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* Шапка для текста при скролле */
-.header-title {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 998;
-    text-align: center;
-    padding: 15px 20px;
-    background: rgba(0, 0, 0, 0);
-    backdrop-filter: blur(0px);
-    border-bottom: 0px solid rgba(255, 255, 255, 0.1);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-}
-
-.header-title h1 {
-    font-size: 40px;
-    opacity: 1;
-    transform: scale(1);
-    animation: none;
-    margin: 0;
-}
-
-.header-title.active {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    pointer-events: auto;
-}
-
-.header-title.active h1 {
-    font-size: 28px;
 }
 
 .feed {
@@ -125,6 +98,7 @@ h1 {
     padding: 20px;
     gap: 20px;
     padding-bottom: 100px;
+    margin-top: 0;
 }
 
 .post {
@@ -341,13 +315,9 @@ h1 {
 </head>
 <body>
 
-<div class="header-title" id="headerTitle">
-    <h1>lizasex</h1>
-</div>
-
 <div class="hero">
     <canvas id="stars"></canvas>
-    <h1>lizasex</h1>
+    <h1 id="title">lizasex</h1>
 </div>
 
 <div class="feed" id="feed"></div>
@@ -367,7 +337,7 @@ const ctx = canvas.getContext("2d");
 const music = document.getElementById("bgMusic");
 const musicBtn = document.getElementById("musicBtn");
 const feed = document.getElementById("feed");
-const headerTitle = document.getElementById("headerTitle");
+const title = document.getElementById("title");
 
 let isPlaying = false;
 
@@ -481,12 +451,37 @@ function savePost(postId) {
     localStorage.setItem(`post_${postId}`, JSON.stringify(postsData[postId]));
 }
 
-// Скролл - текст становится шапкой
+// Скролл - анимация текста
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 100) {
-        headerTitle.classList.add('active');
+    const scrollY = window.scrollY;
+    const maxScroll = window.innerHeight;
+    const progress = Math.min(scrollY / maxScroll, 1);
+    
+    if (progress > 0) {
+        title.classList.add('scrolled');
     } else {
-        headerTitle.classList.remove('active');
+        title.classList.remove('scrolled');
+    }
+    
+    // Интерполяция размера шрифта
+    const minSize = 28;
+    const maxSize = 120;
+    const fontSize = maxSize - (maxSize - minSize) * progress;
+    title.style.fontSize = fontSize + 'px';
+    
+    // Интерполяция позиции
+    const startTop = 50;
+    const endTop = 0;
+    const top = startTop - (startTop - endTop) * progress;
+    title.style.top = top + '%';
+    
+    // Плавное появление фона
+    if (progress > 0) {
+        title.style.background = `rgba(0, 0, 0, ${0.9 * progress})`;
+        title.style.borderBottomWidth = (1 * progress) + 'px';
+    } else {
+        title.style.background = 'rgba(0, 0, 0, 0)';
+        title.style.borderBottomWidth = '0px';
     }
 });
 
