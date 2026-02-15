@@ -65,6 +65,7 @@ h1 {
     text-shadow: 0 0 25px rgba(255,255,255,0.4);
     transition: all 0.3s ease;
     margin: 0;
+    position: relative;
 }
 
 @keyframes gradientMove {
@@ -78,6 +79,43 @@ h1 {
         opacity: 1;
         transform: scale(1);
     }
+}
+
+/* Шапка для текста при скролле */
+.header-title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 998;
+    text-align: center;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    border-bottom: 0px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.header-title h1 {
+    font-size: 40px;
+    opacity: 1;
+    transform: scale(1);
+    animation: none;
+    margin: 0;
+}
+
+.header-title.active {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: auto;
+}
+
+.header-title.active h1 {
+    font-size: 28px;
 }
 
 .feed {
@@ -303,6 +341,10 @@ h1 {
 </head>
 <body>
 
+<div class="header-title" id="headerTitle">
+    <h1>lizasex</h1>
+</div>
+
 <div class="hero">
     <canvas id="stars"></canvas>
     <h1>lizasex</h1>
@@ -325,6 +367,7 @@ const ctx = canvas.getContext("2d");
 const music = document.getElementById("bgMusic");
 const musicBtn = document.getElementById("musicBtn");
 const feed = document.getElementById("feed");
+const headerTitle = document.getElementById("headerTitle");
 
 let isPlaying = false;
 
@@ -437,6 +480,15 @@ function addComment(postId) {
 function savePost(postId) {
     localStorage.setItem(`post_${postId}`, JSON.stringify(postsData[postId]));
 }
+
+// Скролл - текст становится шапкой
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 100) {
+        headerTitle.classList.add('active');
+    } else {
+        headerTitle.classList.remove('active');
+    }
+});
 
 // Звёзды
 function resizeCanvas() {
