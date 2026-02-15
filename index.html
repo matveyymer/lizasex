@@ -24,7 +24,7 @@ html, body {
 
 .hero {
     position: relative;
-    height: 100dvh;
+    height: 40dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -43,7 +43,6 @@ h1 {
     font-size: 120px;
     font-weight: bold;
     z-index: 999;
-    opacity: 1;
     
     background: linear-gradient(
         45deg,
@@ -68,11 +67,9 @@ h1 {
     transform: translate(-50%, -50%);
     width: auto;
     white-space: nowrap;
-    will-change: transform, font-size, top, background;
+    will-change: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    backface-visibility: hidden;
-    perspective: 1000px;
 }
 
 @keyframes gradientMove {
@@ -441,42 +438,34 @@ function savePost(postId) {
     localStorage.setItem(`post_${postId}`, JSON.stringify(postsData[postId]));
 }
 
-// Скролл - анимация текста БЕЗ BLUR
-let rafId;
+// Скролл - правильная анимация
 window.addEventListener('scroll', () => {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        const maxScroll = window.innerHeight;
-        const progress = Math.min(scrollY / maxScroll, 1);
-        
-        // Интерполяция размера шрифта
-        const minSize = 28;
-        const maxSize = 120;
-        const fontSize = maxSize - (maxSize - minSize) * progress;
-        
-        // Интерполяция позиции
-        const startTop = 50;
-        const endTop = 0;
-        const top = startTop - (startTop - endTop) * progress;
-        
-        // Плавное появление фона
-        const bgOpacity = 0.9 * progress;
-        const borderOpacity = 1 * progress;
-        
-        // Обновляем стили через transform для лучшей производительности
-        title.style.fontSize = fontSize + 'px';
-        title.style.top = top + '%';
-        title.style.backgroundColor = `rgba(0, 0, 0, ${bgOpacity})`;
-        title.style.borderBottom = `${borderOpacity}px solid rgba(255, 255, 255, 0.1)`;
-        
-        // Добавляем/убираем padding только когда нужно
-        if (progress > 0.1) {
-            title.style.padding = (15 - 15 * progress) + 'px 20px';
-        } else {
-            title.style.padding = '15px 20px';
-        }
-    });
+    const scrollY = window.scrollY;
+    const heroHeight = window.innerHeight;
+    
+    // Прогресс от 0 до 1 (0 в hero, 1 после hero)
+    const progress = Math.min(scrollY / heroHeight, 1);
+    
+    // Размер шрифта: от 120px к 28px
+    const fontSize = 120 - (120 - 28) * progress;
+    title.style.fontSize = fontSize + 'px';
+    
+    // Позиция: от 50% к 0%
+    const topPosition = 50 - 50 * progress;
+    title.style.top = topPosition + '%';
+    
+    // Фон: от прозрачного к тёмному
+    const bgOpacity = 0.9 * progress;
+    title.style.backgroundColor = `rgba(0, 0, 0, ${bgOpacity})`;
+    
+    // Граница: постепенное появление
+    if (progress > 0) {
+        title.style.borderBottom = `1px solid rgba(255, 255, 255, ${0.1 * progress})`;
+        title.style.padding = `${15 - 15 * progress}px 20px`;
+    } else {
+        title.style.borderBottom = 'none';
+        title.style.padding = '15px 20px';
+    }
 }, { passive: true });
 
 // Звёзды
