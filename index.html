@@ -2,21 +2,42 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 <title>Лиза ✨</title>
 
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    background: #000;
+}
 
 body {
-    overflow: hidden;
+    background: #000;
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+/* ===== HERO ===== */
+
+.hero {
+    position: relative;
     height: 100vh;
-    background: radial-gradient(circle at center, #050510 0%, #000 80%);
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Arial', sans-serif;
-    cursor: default;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #050510 0%, #000 80%);
 }
 
 canvas {
@@ -25,14 +46,14 @@ canvas {
     left: 0;
 }
 
-/* Надпись */
+/* ===== ТЕКСТ ===== */
+
 h1 {
     font-size: 120px;
     font-weight: bold;
     z-index: 2;
     opacity: 0;
     transform: scale(0.8);
-    animation: fadeInText 3s ease forwards;
 
     background: linear-gradient(
         45deg,
@@ -45,11 +66,12 @@ h1 {
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
     animation:
         gradientMove 6s ease infinite,
         fadeInText 3s ease forwards;
-    
-    text-shadow: 0 0 20px rgba(255,255,255,0.4);
+
+    text-shadow: 0 0 25px rgba(255,255,255,0.4);
 }
 
 @keyframes gradientMove {
@@ -64,12 +86,32 @@ h1 {
         transform: scale(1);
     }
 }
+
+/* ===== ЛЕНТА (на будущее) ===== */
+
+.feed {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+}
+
+.feed img {
+    width: 100%;
+    display: block;
+}
 </style>
 </head>
 <body>
 
-<canvas id="stars"></canvas>
-<h1>lizasex</h1>
+<div class="hero">
+    <canvas id="stars"></canvas>
+    <h1>lizasex</h1>
+</div>
+
+<div class="feed">
+    <!-- сюда будешь просто добавлять фотки -->
+    <!-- <img src="photo1.jpg"> -->
+</div>
 
 <audio id="bgMusic" loop>
     <source src="SEMATARY – 9 SCARECROWS.mp3" type="audio/mpeg">
@@ -80,8 +122,13 @@ const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 const music = document.getElementById("bgMusic");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 let stars = [];
 let mouseX = 0;
@@ -120,6 +167,7 @@ function drawStars() {
         ctx.fill();
 
         star.y += star.speed;
+
         if (star.y > canvas.height) {
             star.y = 0;
             star.x = Math.random() * canvas.width;
@@ -132,17 +180,13 @@ function drawStars() {
 
 drawStars();
 
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
-
 window.addEventListener("mousemove", (e) => {
     mouseX = (e.clientX - canvas.width / 2) / 50;
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
 /* Плавный fade-in музыки */
+
 function startMusic() {
     music.volume = 0;
     music.play().then(() => {
