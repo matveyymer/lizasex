@@ -9,11 +9,7 @@
 <title>Лиза ✨</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
     background: #000;
@@ -23,7 +19,6 @@ html, body {
 }
 
 /* ===== HERO ===== */
-
 .hero {
     position: relative;
     height: 100dvh;
@@ -32,40 +27,23 @@ html, body {
     align-items: center;
     overflow: hidden;
     background: radial-gradient(circle at center, #050510 0%, #000 80%);
-    padding-bottom: 15px; /* уменьшает разрыв между текстом и лентой */
+    padding-bottom: 15px;
 }
 
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
+canvas { position: absolute; top: 0; left: 0; }
 
 /* ===== ТЕКСТ ===== */
-
 h1 {
     font-size: 120px;
     font-weight: bold;
     z-index: 2;
     opacity: 0;
     transform: scale(0.8);
-
-    background: linear-gradient(
-        45deg,
-        #ff00cc,
-        #3333ff,
-        #00ffff,
-        #ffcc00,
-        #ff0066
-    );
+    background: linear-gradient(45deg, #ff00cc,#3333ff,#00ffff,#ffcc00,#ff0066);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    animation:
-        gradientMove 6s ease infinite,
-        fadeInText 3s ease forwards;
-
+    animation: gradientMove 6s ease infinite, fadeInText 3s ease forwards;
     text-shadow: 0 0 25px rgba(255,255,255,0.4);
 }
 
@@ -74,29 +52,21 @@ h1 {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
-
-@keyframes fadeInText {
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
+@keyframes fadeInText { to { opacity: 1; transform: scale(1); } }
 
 /* ===== ЛЕНТА ===== */
-
 .feed {
     background: #000;
     display: flex;
     flex-direction: column;
-    padding: 20px; /* отступ сверху и снизу ленты */
-    gap: 20px; /* промежуток между фотками */
+    padding: 20px;
+    gap: 20px;
 }
-
 .feed img {
     width: 100%;
     display: block;
-    border-radius: 8px; /* мягкие края фоток */
-    object-fit: cover; /* сохраняет пропорции */
+    border-radius: 8px;
+    object-fit: cover;
 }
 </style>
 </head>
@@ -104,7 +74,7 @@ h1 {
 
 <div class="hero">
     <canvas id="stars"></canvas>
-    <h1>lizasex</h1>
+    <h1 id="heroText">lizasex</h1>
 </div>
 
 <div class="feed">
@@ -126,12 +96,12 @@ h1 {
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 const music = document.getElementById("bgMusic");
+const heroText = document.getElementById("heroText");
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
-
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
@@ -155,52 +125,74 @@ function drawStars() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     stars.forEach(star => {
+        // анимация twinkle
         star.alpha += star.twinkleSpeed;
-        if (star.alpha > 1) { star.alpha = 1; star.twinkleSpeed *= -1; }
-        if (star.alpha < 0) { star.alpha = 0; star.twinkleSpeed *= -1; }
+        if (star.alpha > 1) star.twinkleSpeed *= -1;
+        if (star.alpha < 0) star.twinkleSpeed *= -1;
 
         ctx.globalAlpha = star.alpha;
         ctx.beginPath();
-        ctx.arc(
-            star.x + mouseX * 0.02,
-            star.y + mouseY * 0.02,
-            star.radius,
-            0,
-            Math.PI * 2
-        );
+        ctx.arc(star.x + mouseX*0.02, star.y + mouseY*0.02, star.radius, 0, Math.PI*2);
         ctx.fillStyle = "white";
         ctx.fill();
 
         star.y += star.speed;
-
         if (star.y > canvas.height) {
             star.y = 0;
             star.x = Math.random() * canvas.width;
         }
     });
-
     ctx.globalAlpha = 1;
     requestAnimationFrame(drawStars);
 }
-
 drawStars();
 
-// движение звёзд за мышью
-window.addEventListener("mousemove", (e) => {
-    mouseX = (e.clientX - canvas.width / 2) / 50;
-    mouseY = (e.clientY - canvas.height / 2) / 50;
+window.addEventListener("mousemove", e => {
+    mouseX = (e.clientX - canvas.width/2)/50;
+    mouseY = (e.clientY - canvas.height/2)/50;
 });
+
+// ===== Web Audio API для реакции =====
+let audioCtx, analyser, source, dataArray;
+
+function setupAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    source = audioCtx.createMediaElementSource(music);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+}
+
+// пульсация текста + влияние на звёзды
+function animateAudio() {
+    analyser.getByteFrequencyData(dataArray);
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+    let avg = sum / dataArray.length; // средняя громкость
+
+    // текст пульсирует по громкости
+    let scale = 1 + avg/1000; // регулируем силу пульсации
+    heroText.style.transform = `scale(${scale})`;
+
+    // звёзды ярче при громкости
+    stars.forEach(star => {
+        star.alpha = Math.min(1, Math.max(0.2, star.alpha + avg/5000));
+    });
+
+    requestAnimationFrame(animateAudio);
+}
 
 // плавный fade-in музыки
 function startMusic() {
     music.volume = 0;
     music.play().then(() => {
+        setupAudio();
+        animateAudio();
         let fade = setInterval(() => {
-            if (music.volume < 0.98) {
-                music.volume += 0.02;
-            } else {
-                clearInterval(fade);
-            }
+            if (music.volume < 0.98) music.volume += 0.02;
+            else clearInterval(fade);
         }, 200);
     }).catch(() => {
         document.addEventListener("click", startMusic, { once: true });
