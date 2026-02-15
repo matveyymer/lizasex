@@ -183,26 +183,17 @@ window.addEventListener("mousemove", (e) => {
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
-// ===== Авто-старт музыки с обходом блокировок =====
-function unlockAudio() {
-    const silent = new Audio();
-    silent.src = "data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAA..."; // короткий silent mp3
-    silent.play().finally(() => {
-        music.volume = 1;
-        music.play().catch(() => {
-            // fallback на клик/касание
-            const unlock = () => {
-                music.play();
-                window.removeEventListener("click", unlock);
-                window.removeEventListener("touchstart", unlock);
-            };
-            window.addEventListener("click", unlock);
-            window.addEventListener("touchstart", unlock);
-        });
+// ===== Гарантированный запуск музыки =====
+function playMusic() {
+    music.volume = 1;
+    music.play().catch(() => {
+        console.log("Воспроизведение не удалось.");
     });
 }
 
-window.addEventListener("load", unlockAudio);
+// Любое взаимодействие запускает музыку
+window.addEventListener("click", playMusic, { once: true });
+window.addEventListener("touchstart", playMusic, { once: true });
 </script>
 
 </body>
