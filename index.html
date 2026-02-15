@@ -92,6 +92,31 @@ h1 {
     border-radius: 8px;
     object-fit: cover;
 }
+
+.music-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    background: linear-gradient(45deg, #ff00cc, #3333ff);
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.music-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 0, 204, 0.6);
+}
+
+.music-button.playing {
+    background: linear-gradient(45deg, #00ffff, #ffcc00);
+}
 </style>
 </head>
 <body>
@@ -102,24 +127,30 @@ h1 {
 </div>
 
 <div class="feed">
-    <img src="IMG_0146.jpeg">
-    <img src="IMG_0148.jpeg">
-    <img src="IMG_0149.jpeg">
-    <img src="IMG_0150.jpeg">
-    <img src="IMG_0151.jpeg">
-    <img src="IMG_0152.jpeg">
-    <img src="IMG_0153.jpeg">
-    <img src="IMG_0154.jpeg">
+    <img src="IMG_0146.jpeg" alt="image">
+    <img src="IMG_0148.jpeg" alt="image">
+    <img src="IMG_0149.jpeg" alt="image">
+    <img src="IMG_0150.jpeg" alt="image">
+    <img src="IMG_0151.jpeg" alt="image">
+    <img src="IMG_0152.jpeg" alt="image">
+    <img src="IMG_0153.jpeg" alt="image">
+    <img src="IMG_0154.jpeg" alt="image">
 </div>
+
+<button class="music-button" id="musicBtn">🎵 Включить музыку</button>
 
 <audio id="bgMusic" loop>
     <source src="SEMATARY - 9 SCARECROWS.mp3" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио элемент
 </audio>
 
 <script>
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 const music = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+
+let isPlaying = false;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -183,17 +214,58 @@ window.addEventListener("mousemove", (e) => {
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
-// ===== Гарантированный запуск музыки =====
+// ===== Управление музыкой =====
 function playMusic() {
-    music.volume = 1;
-    music.play().catch(() => {
-        console.log("Воспроизведение не удалось.");
-    });
+    if (isPlaying) {
+        music.pause();
+        isPlaying = false;
+        musicBtn.textContent = "🎵 Включить музыку";
+        musicBtn.classList.remove("playing");
+        console.log("Музыка остановлена");
+    } else {
+        music.volume = 0.5;
+        const playPromise = music.play();
+        
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    isPlaying = true;
+                    musicBtn.textContent = "⏸ Остановить музыку";
+                    musicBtn.classList.add("playing");
+                    console.log("✓ Музыка играет");
+                })
+                .catch(error => {
+                    console.error("✗ Ошибка воспроизведения:", error);
+                    console.log("Убедитесь, что файл SEMATARY - 9 SCARECROWS.mp3 находится в одной папке с HTML");
+                });
+        }
+    }
 }
 
-// Любое взаимодействие запускает музыку
-window.addEventListener("click", playMusic, { once: true });
-window.addEventListener("touchstart", playMusic, { once: true });
+// Клик на кнопку
+musicBtn.addEventListener("click", playMusic);
+
+// Автозапуск при клике на страницу (если нужен)
+document.addEventListener("click", () => {
+    if (!isPlaying && music.paused) {
+        console.log("Попытка автозапуска музыки...");
+        // Раскомментируйте следующую строку для автозапуска
+        // playMusic();
+    }
+}, { once: true });
+
+// Проверка наличия аудио элемента
+music.addEventListener("error", (e) => {
+    console.error("Ошибка загрузки аудиофайла:", e);
+});
+
+music.addEventListener("play", () => {
+    console.log("Аудио начало воспроизводиться");
+});
+
+music.addEventListener("pause", () => {
+    console.log("Аудио пауза");
+});
 </script>
 
 </body>
