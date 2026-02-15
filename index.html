@@ -191,15 +191,21 @@ window.addEventListener("mousemove", (e) => {
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
-// запуск музыки без fade-in
-function startMusic() {
-    music.volume = 1; // сразу полная громкость
+// запуск музыки сразу и с fallback на мобильных
+function tryPlayMusic() {
+    music.volume = 1;
     music.play().catch(() => {
-        document.addEventListener("click", startMusic, { once: true });
+        const unlock = () => {
+            music.play();
+            window.removeEventListener("click", unlock);
+            window.removeEventListener("touchstart", unlock);
+        };
+        window.addEventListener("click", unlock);
+        window.addEventListener("touchstart", unlock);
     });
 }
 
-startMusic();
+tryPlayMusic();
 </script>
 
 </body>
