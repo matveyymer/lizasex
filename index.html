@@ -125,7 +125,6 @@ h1 {
     transition: all 0.3s ease;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
     white-space: nowrap;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .music-button:hover {
@@ -147,10 +146,9 @@ h1 {
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
 }
 
-/* Стили для светлого фона */
+/* Тёмный текст когда кнопка над светлым фото */
 .music-button.light-bg {
     color: #000;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .music-button.light-bg:hover {
@@ -158,10 +156,6 @@ h1 {
 }
 
 .music-button.light-bg.playing {
-    color: #000;
-}
-
-.music-button.light-bg.playing:hover {
     color: #000;
 }
 </style>
@@ -173,7 +167,7 @@ h1 {
     <h1>lizasex</h1>
 </div>
 
-<div class="feed">
+<div class="feed" id="feed">
     <img src="IMG_0146.jpeg" alt="image">
     <img src="IMG_0148.jpeg" alt="image">
     <img src="IMG_0149.jpeg" alt="image">
@@ -198,6 +192,7 @@ const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 const music = document.getElementById("bgMusic");
 const musicBtn = document.getElementById("musicBtn");
+const feed = document.getElementById("feed");
 
 let isPlaying = false;
 
@@ -269,22 +264,45 @@ function checkBackground() {
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
 
-    // Получаем изображение из области за кнопкой
-    const imageData = ctx.getImageData(x, y, 1, 1).data;
+    // Проверяем есть ли фото под кнопкой
+    const element = document.elementFromPoint(x, y);
     
-    // Вычисляем яркость
-    const brightness = (imageData[0] + imageData[1] + imageData[2]) / 3;
-    
-    // Если яркость > 128 (светлая область) - делаем текст чёрным
-    if (brightness > 128) {
-        musicBtn.classList.add("light-bg");
+    if (element && element.tagName === 'IMG') {
+        // Если под кнопкой фото, проверяем его яркость
+        const img = element;
+        
+        // Создаём временный canvas для анализа изображения
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        
+        // Рисуем изображение
+        tempCtx.drawImage(img, 0, 0);
+        
+        // Получаем пиксели в центре изображения (где кнопка)
+        const imageRect = img.getBoundingClientRect();
+        const relX = Math.floor((x - imageRect.left) * (img.width / imageRect.width));
+        const relY = Math.floor((y - imageRect.top) * (img.height / imageRect.height));
+        
+        const imageData = tempCtx.getImageData(relX, relY, 1, 1).data;
+        const brightness = (imageData[0] + imageData[1] + imageData[2]) / 3;
+        
+        if (brightness > 128) {
+            musicBtn.classList.add("light-bg");
+        } else {
+            musicBtn.classList.remove("light-bg");
+        }
     } else {
+        // Если под кнопкой не фото, то тёмный фон
         musicBtn.classList.remove("light-bg");
     }
 }
 
-// Проверяем фон каждый кадр
-setInterval(checkBackground, 100);
+// Проверяем фон при скролле
+window.addEventListener('scroll', checkBackground);
+window.addEventListener('load', checkBackground);
+setInterval(checkBackground, 200);
 
 // ===== Управление музыкой =====
 function playMusic() {
