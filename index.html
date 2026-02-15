@@ -60,12 +60,9 @@ h1 {
 
     animation:
         gradientMove 6s ease infinite,
-        fadeInText 3s ease forwards,
-        floatText 4s ease-in-out infinite 3s,
-        glowPulse 3s ease-in-out infinite 3s;
+        fadeInText 3s ease forwards;
 
     text-shadow: 0 0 25px rgba(255,255,255,0.4);
-    filter: drop-shadow(0 0 30px rgba(255, 0, 204, 0.3));
 }
 
 @keyframes gradientMove {
@@ -78,20 +75,6 @@ h1 {
     to {
         opacity: 1;
         transform: scale(1);
-    }
-}
-
-@keyframes floatText {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-20px) scale(1.05); }
-}
-
-@keyframes glowPulse {
-    0%, 100% { 
-        filter: drop-shadow(0 0 30px rgba(255, 0, 204, 0.3));
-    }
-    50% { 
-        filter: drop-shadow(0 0 50px rgba(255, 0, 204, 0.8));
     }
 }
 
@@ -108,52 +91,14 @@ h1 {
     display: block;
     border-radius: 8px;
     object-fit: cover;
-    opacity: 0;
-    transform: translateY(50px);
-    animation: slideInUp 0.8s ease forwards;
     transition: all 0.3s ease;
     cursor: pointer;
-    position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.feed img:nth-child(1) { animation-delay: 0.1s; }
-.feed img:nth-child(2) { animation-delay: 0.2s; }
-.feed img:nth-child(3) { animation-delay: 0.3s; }
-.feed img:nth-child(4) { animation-delay: 0.4s; }
-.feed img:nth-child(5) { animation-delay: 0.5s; }
-.feed img:nth-child(6) { animation-delay: 0.6s; }
-.feed img:nth-child(7) { animation-delay: 0.7s; }
-.feed img:nth-child(8) { animation-delay: 0.8s; }
-
 .feed img:hover {
-    transform: scale(1.05) translateY(-10px);
-    box-shadow: 0 20px 50px rgba(255, 0, 204, 0.4);
-    filter: brightness(1.1);
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes shimmer {
-    0%, 100% {
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-    50% {
-        box-shadow: 0 10px 40px rgba(255, 0, 204, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1);
-    }
-}
-
-.feed img {
-    animation: slideInUp 0.8s ease forwards, shimmer 3s ease-in-out infinite;
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
 }
 
 .controls {
@@ -194,21 +139,11 @@ h1 {
     border-color: rgba(0, 255, 200, 0.3);
     color: rgba(0, 255, 200, 0.9);
     box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
-    animation: buttonPulse 2s ease-in-out infinite;
 }
 
 .music-button.playing:hover {
     background: rgba(0, 255, 200, 0.25);
     box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
-}
-
-@keyframes buttonPulse {
-    0%, 100% {
-        box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
-    }
-    50% {
-        box-shadow: 0 0 35px rgba(0, 255, 200, 0.5);
-    }
 }
 </style>
 </head>
@@ -327,7 +262,7 @@ function playMusic() {
                     isPlaying = true;
                     musicBtn.textContent = "⏸ Остановить музыку";
                     musicBtn.classList.add("playing");
-                    console.log("�� Музыка играет");
+                    console.log("✓ Музыка играет");
                 })
                 .catch(error => {
                     console.error("✗ Ошибка воспроизведения:", error);
