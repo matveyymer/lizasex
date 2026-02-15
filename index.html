@@ -84,6 +84,7 @@ h1 {
     flex-direction: column;
     padding: 20px;
     gap: 20px;
+    padding-bottom: 100px;
 }
 
 .feed img {
@@ -105,7 +106,7 @@ h1 {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 100;
+    z-index: 1000;
     display: flex;
     gap: 10px;
     flex-direction: column;
@@ -148,29 +149,23 @@ h1 {
 
 /* Светлый фон - чёрный текст и тёмная кнопка */
 .music-button.light-bg {
-    background: rgba(0, 0, 0, 0.5) !important;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(0, 0, 0, 0.7) !important;
-    color: #000 !important;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3) !important;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 0, 0, 0.7);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .music-button.light-bg:hover {
-    background: rgba(0, 0, 0, 0.6) !important;
-    border-color: rgba(0, 0, 0, 0.8) !important;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4) !important;
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
 }
 
 .music-button.light-bg.playing {
-    background: rgba(0, 0, 0, 0.5) !important;
-    border-color: rgba(0, 0, 0, 0.7) !important;
-    color: #000 !important;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) !important;
-}
-
-.music-button.light-bg.playing:hover {
-    background: rgba(0, 0, 0, 0.6) !important;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4) !important;
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(0, 0, 0, 0.7);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
 }
 </style>
 </head>
@@ -272,69 +267,6 @@ window.addEventListener("mousemove", (e) => {
     mouseY = (e.clientY - canvas.height / 2) / 50;
 });
 
-// ===== Проверка яркости фона за кнопкой =====
-function checkBackground() {
-    const rect = musicBtn.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-
-    // Проверяем есть ли фото под кнопкой
-    const element = document.elementFromPoint(x, y);
-    
-    console.log("Элемент под кнопкой:", element?.tagName, element?.src);
-    
-    if (element && element.tagName === 'IMG') {
-        // Если под кнопкой фото, проверяем его яркость
-        const img = element;
-        
-        // Создаём временный canvas для анализа изображения
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCanvas.width = img.width;
-        tempCanvas.height = img.height;
-        
-        try {
-            // Рисуем изображение
-            tempCtx.drawImage(img, 0, 0);
-            
-            // Получаем пиксели в центре изображения (где кнопка)
-            const imageRect = img.getBoundingClientRect();
-            const relX = Math.floor((x - imageRect.left) * (img.width / imageRect.width));
-            const relY = Math.floor((y - imageRect.top) * (img.height / imageRect.height));
-            
-            // Ограничиваем значения
-            const safeX = Math.max(0, Math.min(relX, img.width - 1));
-            const safeY = Math.max(0, Math.min(relY, img.height - 1));
-            
-            const imageData = tempCtx.getImageData(safeX, safeY, 1, 1).data;
-            const brightness = (imageData[0] + imageData[1] + imageData[2]) / 3;
-            
-            console.log("Яркость:", brightness);
-            
-            if (brightness > 140) {
-                console.log("Добавляю класс light-bg");
-                musicBtn.classList.add("light-bg");
-            } else {
-                console.log("Убираю класс light-bg");
-                musicBtn.classList.remove("light-bg");
-            }
-        } catch (e) {
-            console.error("Ошибка анализа:", e);
-            musicBtn.classList.remove("light-bg");
-        }
-    } else {
-        console.log("Под кнопкой не фото");
-        musicBtn.classList.remove("light-bg");
-    }
-}
-
-// Проверяем фон при скролле
-window.addEventListener('scroll', checkBackground);
-window.addEventListener('load', () => {
-    setTimeout(checkBackground, 100);
-});
-setInterval(checkBackground, 300);
-
 // ===== Управление музыкой =====
 function playMusic() {
     if (isPlaying) {
@@ -342,7 +274,6 @@ function playMusic() {
         isPlaying = false;
         musicBtn.textContent = "🎵 Включить музыку";
         musicBtn.classList.remove("playing");
-        console.log("Музыка остановлена");
     } else {
         music.volume = 0.5;
         const playPromise = music.play();
@@ -353,7 +284,6 @@ function playMusic() {
                     isPlaying = true;
                     musicBtn.textContent = "⏸ Остановить музыку";
                     musicBtn.classList.add("playing");
-                    console.log("✓ Музыка играет");
                 })
                 .catch(error => {
                     console.error("✗ Ошибка воспроизведения:", error);
@@ -362,20 +292,10 @@ function playMusic() {
     }
 }
 
-// Клик на кнопку
 musicBtn.addEventListener("click", playMusic);
 
-// Проверка наличия аудио элемента
 music.addEventListener("error", (e) => {
     console.error("Ошибка загрузки аудиофайла:", e);
-});
-
-music.addEventListener("play", () => {
-    console.log("Аудио начало воспроизводиться");
-});
-
-music.addEventListener("pause", () => {
-    console.log("Аудио пауза");
 });
 </script>
 
