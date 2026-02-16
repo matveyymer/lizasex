@@ -40,7 +40,6 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-bottom: 80px;
 }
 
 h1 {
@@ -95,7 +94,7 @@ h1 {
 .feed img {
     width: 100%;
     display: block;
-    border-radius: 8px;
+    border-radius: 10px;
     object-fit: cover;
     transition: all 0.3s ease;
     cursor: pointer;
@@ -116,24 +115,26 @@ h1 {
 }
 
 .music-button {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 25px;
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 30px;
     cursor: pointer;
     font-size: 14px;
     font-weight: bold;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
 }
 
 .music-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.5);
 }
 
 .music-button.playing {
-    box-shadow: 0 0 20px rgba(255,255,255,0.4);
+    background: #000000;
+    color: #ffffff;
 }
 </style>
 </head>
