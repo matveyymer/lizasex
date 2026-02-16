@@ -22,27 +22,30 @@ html, body {
     overflow-x: hidden;
 }
 
+/* ===== Звёздный фон ===== */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* ===== Hero ===== */
 .hero {
     position: relative;
+    z-index: 2;
     height: 60dvh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
-    background: radial-gradient(circle at center, #050510 0%, #000 80%);
     padding-bottom: 80px;
-}
-
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 h1 {
     font-size: 120px;
     font-weight: bold;
-    z-index: 2;
     opacity: 0;
     transform: scale(0.8);
 
@@ -78,8 +81,11 @@ h1 {
     }
 }
 
+/* ===== Feed ===== */
 .feed {
-    background: #000;
+    position: relative;
+    z-index: 2;
+    background: transparent;
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -101,15 +107,12 @@ h1 {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
 }
 
+/* ===== Кнопка музыки ===== */
 .controls {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 100;
-    display: flex;
-    gap: 10px;
-    flex-direction: column;
-    align-items: flex-end;
 }
 
 .music-button {
@@ -123,56 +126,42 @@ h1 {
     font-size: 14px;
     font-weight: bold;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-    white-space: nowrap;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .music-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .music-button.playing {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
-}
-
-.music-button.playing:hover {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 20px rgba(255,255,255,0.4);
 }
 </style>
 </head>
 <body>
 
+<canvas id="stars"></canvas>
+
 <div class="hero">
-    <canvas id="stars"></canvas>
     <h1>lizasex</h1>
 </div>
 
 <div class="feed">
-    <img src="IMG_0146.jpeg" alt="image">
-    <img src="IMG_0148.jpeg" alt="image">
-    <img src="IMG_0149.jpeg" alt="image">
-    <img src="IMG_0150.jpeg" alt="image">
-    <img src="IMG_0151.jpeg" alt="image">
-    <img src="IMG_0152.jpeg" alt="image">
-    <img src="IMG_0153.jpeg" alt="image">
-    <img src="IMG_0154.jpeg" alt="image">
+    <img src="IMG_0146.jpeg">
+    <img src="IMG_0148.jpeg">
+    <img src="IMG_0149.jpeg">
+    <img src="IMG_0150.jpeg">
+    <img src="IMG_0151.jpeg">
+    <img src="IMG_0152.jpeg">
+    <img src="IMG_0153.jpeg">
+    <img src="IMG_0154.jpeg">
 </div>
 
 <div class="controls">
     <button class="music-button" id="musicBtn">🎵 Включить музыку</button>
 </div>
 
-<audio id="bgMusic" loop preload="auto">
+<audio id="bgMusic" loop>
     <source src="SEMATARY 9 SCARECROWS.mp3" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио элемент
 </audio>
 
 <script>
@@ -195,10 +184,10 @@ let stars = [];
 let mouseX = 0;
 let mouseY = 0;
 
-for (let i = 0; i < 250; i++) {
+for (let i = 0; i < 300; i++) {
     stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
         radius: Math.random() * 1.5,
         speed: Math.random() * 0.6,
         alpha: Math.random(),
@@ -211,8 +200,9 @@ function drawStars() {
 
     stars.forEach(star => {
         star.alpha += star.twinkleSpeed;
-        if (star.alpha > 1) { star.alpha = 1; star.twinkleSpeed *= -1; }
-        if (star.alpha < 0) { star.alpha = 0; star.twinkleSpeed *= -1; }
+        if (star.alpha > 1 || star.alpha < 0) {
+            star.twinkleSpeed *= -1;
+        }
 
         ctx.globalAlpha = star.alpha;
         ctx.beginPath();
@@ -241,51 +231,26 @@ function drawStars() {
 drawStars();
 
 window.addEventListener("mousemove", (e) => {
-    mouseX = (e.clientX - canvas.width / 2) / 50;
-    mouseY = (e.clientY - canvas.height / 2) / 50;
+    mouseX = (e.clientX - window.innerWidth / 2) / 50;
+    mouseY = (e.clientY - window.innerHeight / 2) / 50;
 });
 
-// ===== Управление музыкой =====
-function playMusic() {
+musicBtn.addEventListener("click", () => {
     if (isPlaying) {
         music.pause();
         isPlaying = false;
         musicBtn.textContent = "🎵 Включить музыку";
         musicBtn.classList.remove("playing");
-        console.log("Музыка остановлена");
     } else {
         music.volume = 0.5;
-        const playPromise = music.play();
-        
-        if (playPromise !== undefined) {
-            playPromise
-                .then(() => {
-                    isPlaying = true;
-                    musicBtn.textContent = "⏸ Остановить музыку";
-                    musicBtn.classList.add("playing");
-                    console.log("✓ Музыка играет");
-                })
-                .catch(error => {
-                    console.error("✗ Ошибка воспроизведения:", error);
-                });
-        }
+        music.play().then(() => {
+            isPlaying = true;
+            musicBtn.textContent = "⏸ Остановить музыку";
+            musicBtn.classList.add("playing");
+        }).catch(err => {
+            console.log("Ошибка воспроизведения:", err);
+        });
     }
-}
-
-// Клик на кнопку
-musicBtn.addEventListener("click", playMusic);
-
-// Проверка наличия аудио элемента
-music.addEventListener("error", (e) => {
-    console.error("Ошибка загрузки аудиофайла:", e);
-});
-
-music.addEventListener("play", () => {
-    console.log("Аудио начало воспроизводиться");
-});
-
-music.addEventListener("pause", () => {
-    console.log("Аудио пауза");
 });
 </script>
 
